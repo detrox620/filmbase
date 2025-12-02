@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.contrib.auth.models import User
 import datetime
 
 
@@ -89,6 +90,7 @@ class Film(MyModel):
     people = models.ManyToManyField(Person, verbose_name="Актеры")
     kinopoisk_id = models.PositiveIntegerField(
         "Kinopoisk ID", blank=True, null=True)
+    average_rating = models.PositiveIntegerField("Средняя оценка", blank=True, null=True, default=0)
 
     class Meta:
         ordering = ["name"]
@@ -97,3 +99,32 @@ class Film(MyModel):
 
     def __str__(self):
         return self.name
+
+
+class Profile(MyModel):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="Профиль оценок пользователя")
+
+    is_ratingban = models.DateTimeField("Дата бана", blank=True, null=True)
+    country = models.ForeignKey(Country, on_delete=models.CASCADE, verbose_name="Страна", null=True)
+
+    class Meta:
+        ordering = ["user"]
+        verbose_name = "Профиль"
+        verbose_name_plural = "Профили"
+
+    def __str__(self):
+        return self.user.username
+
+
+class Rating(MyModel):
+    rating = models.PositiveIntegerField("Оценка")
+    film = models.ForeignKey(Film, on_delete=models.CASCADE, verbose_name="Фильм")
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, verbose_name="Пользователь")
+
+    class Meta:
+        ordering = ["rating"]
+        verbose_name = "Оценка"
+        verbose_name_plural = "Оценки"
+
+    def __str__(self):
+        return self.profile.user.username + " - " + self.film.name + " - " + str(self.rating)

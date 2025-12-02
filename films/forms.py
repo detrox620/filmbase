@@ -39,3 +39,7 @@ class PersonForm(forms.ModelForm):
             "birthday": forms.DateInput(attrs={'type': 'date'},
                                         format="%Y-%m-%d")
         }
+
+
+class CreateRatingForm(forms.Form):
+    rating = forms.ChoiceField(choices=[(i, str(i)) for i in range(1, 11)])
