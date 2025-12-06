@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import user_passes_test
 from .models import Country, Film, Genre, Person, Rating
 from .forms import CountryForm, GenreForm, FilmForm, PersonForm, CreateRatingForm
-from .helpers import paginate, build_rating_ui_context
+from .helpers import paginate, build_rating_context
 from django.contrib import messages
 
 
@@ -118,13 +118,14 @@ def genre_delete(request, id):
 
 
 def film_list(request):
-    films = Film.objects.all()
     query = request.GET.get('query', '')
+    order_by = request.GET.get('order_by', 'name')
+    films = Film.objects.all().order_by(order_by, 'name')
     if query:
         films = films.filter(name__icontains=query)
     films = paginate(request, films)
     return render(request, 'films/film/list.html', {'films': films,
-                                                    'query': query})
+                                                    'query': query, 'order_by': order_by})
 
 
 def save_user_rating(request, film):
@@ -151,7 +152,7 @@ def film_detail(request, id):
             return redirect('films:film_detail', id=film.id)
         return save_user_rating(request, film)
 
-    context = build_rating_ui_context(request, film)
+    context = build_rating_context(request, film)
     context['film'] = film
     return render(request, 'films/film/detail.html', context)
 

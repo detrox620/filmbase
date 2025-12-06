@@ -11,4 +11,9 @@
   <div class="card-footer">
     <a href="{% url 'films:film_detail' film.id %}" class="text-decoration-none stretched-link">Подробнее</a>
   </div>
+          {% if film.average_rating %}
+          <div class="mt-2 p-2 bg-light rounded text-muted">
+            Средняя оценка: <strong>{{ film.average_rating_10|floatformat:1 }}</strong>
+          </div>
+        {% endif %}
 </div>

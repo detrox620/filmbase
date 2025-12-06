@@ -15,7 +15,7 @@ def paginate(request, collection, per=12):
     return collection
 
 
-def build_rating_ui_context(request, film):
+def build_rating_context(request, film):
     if not request.user.is_authenticated:
         return {
             'form': None,
