@@ -90,12 +90,18 @@ class Film(MyModel):
     people = models.ManyToManyField(Person, verbose_name="Актеры")
     kinopoisk_id = models.PositiveIntegerField(
         "Kinopoisk ID", blank=True, null=True)
-    average_rating = models.PositiveIntegerField("Средняя оценка", blank=True, null=True, default=0)
+    average_rating = models.PositiveIntegerField("Средняя оценка", blank=True, null=True, default=None)
 
     class Meta:
         ordering = ["name"]
         verbose_name = "Фильм"
         verbose_name_plural = "Фильмы"
+
+    @property
+    def average_rating_10(self):
+        if self.average_rating is not None:
+            return self.average_rating / 10.0
+        return None
 
     def __str__(self):
         return self.name

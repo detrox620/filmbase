@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import user_passes_test
 from .models import Country, Film, Genre, Person, Rating
 from .forms import CountryForm, GenreForm, FilmForm, PersonForm, CreateRatingForm
-from .helpers import paginate
+from .helpers import paginate, build_rating_ui_context
 from django.contrib import messages
 
 
@@ -127,53 +127,7 @@ def film_list(request):
                                                     'query': query})
 
 
-def build_rating_ui_context(request, film):
-    if not request.user.is_authenticated:
-        return {
-            'form': None,
-            'rating': None,
-            'has_rating': False,
-            'show_rating_form': False,
-            'edit_mode': False,
-        }
-
-    profile = request.user.profile
-    existing_rating = Rating.objects.filter(film=film, profile=profile).first()
-    edit_mode = request.GET.get('edit') == '1'
-
-    if edit_mode:
-        form = CreateRatingForm(
-            initial={'rating': existing_rating.rating if existing_rating else 5}
-        )
-        return {
-            'form': form,
-            'rating': existing_rating.rating if existing_rating else None,
-            'has_rating': bool(existing_rating),
-            'show_rating_form': False,
-            'edit_mode': True,
-        }
-    elif existing_rating:
-        return {
-            'form': None,
-            'rating': existing_rating.rating,
-            'has_rating': True,
-            'show_rating_form': False,
-            'edit_mode': False,
-        }
-    else:
-        return {
-            'form': CreateRatingForm(),
-            'rating': None,
-            'has_rating': False,
-            'show_rating_form': True,
-            'edit_mode': False,
-        }
-
-
 def save_user_rating(request, film):
-    if not request.user.is_authenticated:
-        return redirect('login')
-
     form = CreateRatingForm(request.POST)
     if form.is_valid():
         rating_value = int(form.cleaned_data['rating'])
@@ -191,6 +145,10 @@ def film_detail(request, id):
     film = get_object_or_404(queryset, id=id)
 
     if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'delete_rating':
+            Rating.objects.filter(film=film, profile=request.user.profile).delete()
+            return redirect('films:film_detail', id=film.id)
         return save_user_rating(request, film)
 
     context = build_rating_ui_context(request, film)

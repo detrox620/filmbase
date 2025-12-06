@@ -28,10 +28,10 @@
           <i class="bi-trash"></i>
           Удалить
         </a>
+        </div>
       {% endif %}
 
 
-      <div>
         {% if user.is_authenticated %}
           {% if edit_mode or show_rating_form %}
             <div class="mt-4 p-3 bg-light rounded">
@@ -61,7 +61,12 @@
           {% elif has_rating %}
             <div class="mt-4 p-3 bg-light rounded">
               <p>Ваша оценка: <strong>{{ rating }}</strong></p>
-              <a href="{% url 'films:film_detail' film.id %}?edit=1" class="btn btn-outline-primary">Изменить оценку</a>
+              <a href="{% url 'films:film_detail' film.id %}?edit=1" class="btn btn-outline-primary btn-block  mb-2">Изменить оценку</a>
+              <form method="post" action="{% url 'films:film_detail' film.id %}" style="display:inline;">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="delete_rating">
+                  <button type="submit" class="btn btn-outline-danger btn-block">Удалить оценку</button>
+              </form>
             </div>
           {% endif %}
         {% else %}
@@ -69,8 +74,13 @@
             <p><a href="{% url 'login' %}" class="btn btn-outline-primary">Войдите, чтобы оценить фильм.</a></p>
           </div>
         {% endif %}
+        {% if film.average_rating %}
+          <div class="mt-2 p-2 bg-light rounded text-muted">
+            Средняя оценка: <strong>{{ film.average_rating_10|floatformat:1 }}</strong>
+          </div>
+        {% endif %}
       </div>
-    </div>
+
 
     <div class="col-md-9">
       <div class="card">
