@@ -18,7 +18,7 @@ def paginate(request, collection, per=12):
 def build_rating_context(request, film):
     if not request.user.is_authenticated:
         return {
-            'form': None,
+            'rating_form': None,
             'rating': None,
             'has_rating': False,
             'show_rating_form': False,
@@ -34,7 +34,7 @@ def build_rating_context(request, film):
             initial={'rating': existing_rating.rating if existing_rating else 5}
         )
         return {
-            'form': form,
+            'rating_form': form,
             'rating': existing_rating.rating if existing_rating else None,
             'has_rating': bool(existing_rating),
             'show_rating_form': False,
@@ -42,7 +42,7 @@ def build_rating_context(request, film):
         }
     elif existing_rating:
         return {
-            'form': None,
+            'rating_form': None,
             'rating': existing_rating.rating,
             'has_rating': True,
             'show_rating_form': False,
@@ -50,7 +50,7 @@ def build_rating_context(request, film):
         }
     else:
         return {
-            'form': CreateRatingForm(),
+            'rating_form': CreateRatingForm(),
             'rating': None,
             'has_rating': False,
             'show_rating_form': True,
@@ -58,4 +58,24 @@ def build_rating_context(request, film):
         }
 
 
-
+def calculate_average_rating(film, form):
+    if form.is_valid():
+        country = form.cleaned_data['country']
+        time_start = form.cleaned_data['time_start']
+        time_end = form.cleaned_data['time_end']
+        ratings = film.rating_set.all()
+        sum = 0
+        count = 0
+        for rating in ratings:
+            condition = ((country == rating.profile.country or country is None)
+                         and ((time_start is None and time_end is None)
+                         or (time_start <= rating.updated_at <= time_end))
+                         and not rating.profile.is_ratingban)
+            if condition:
+                sum += rating.rating
+                count += 1
+        if count == 0:
+            average_rating = None
+        else:
+            average_rating = sum / count
+        return average_rating

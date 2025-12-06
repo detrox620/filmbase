@@ -43,3 +43,18 @@ class PersonForm(forms.ModelForm):
 
 class CreateRatingForm(forms.Form):
     rating = forms.ChoiceField(choices=[(i, str(i)) for i in range(1, 11)])
+
+
+class FilterRatingForm(forms.Form):
+    country = forms.ModelChoiceField(
+        queryset=Country.objects.all(),
+        empty_label="Выберите страну",
+        required=False)
+    time_start = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        input_formats=['%Y-%m-%dT%H:%M'],
+        required=False)
+    time_end = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+        input_formats=['%Y-%m-%dT%H:%M'],
+        required=False)

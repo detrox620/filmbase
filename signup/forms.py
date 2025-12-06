@@ -3,5 +3,5 @@ from django import forms
 from films.models import Country
 
 
-class Form(UserCreationForm):
+class RegisterForm(UserCreationForm):
     country = forms.ModelChoiceField(queryset=Country.objects.all(), empty_label="Выберите страну")

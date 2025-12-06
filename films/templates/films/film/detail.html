@@ -39,20 +39,20 @@
               <form method="post">
                 {% csrf_token %}
                 <div class="mb-3">
-                  <label for="{{ form.rating.id_for_label }}" class="form-label">Поставьте оценку от 1 до 10:</label>
+                  <label for="{{ rating_form.rating.id_for_label }}" class="form-label">Поставьте оценку от 1 до 10:</label>
                   <input
                       type="range"
-                      id="{{ form.rating.id_for_label }}"
-                      name="{{ form.rating.name }}"
+                      id="{{ rating_form.rating.id_for_label }}"
+                      name="{{ rating_form.rating.name }}"
                       min="1"
                       max="10"
-                      value="{{ form.rating.value|default:5 }}"
+                      value="{{ rating_form.rating.value|default:5 }}"
                       class="form-range"
                       oninput="ratingValue.innerText = this.value"
                   >
                     <span id="ratingValue" class="ms-2">{{ form.rating.value|default:5 }}</span>
                 </div>
-                <button type="submit" class="btn btn-success">Сохранить оценку</button>
+                <button type="submit" class="btn btn-success" name="action" value="save_rating">Сохранить оценку</button>
                 {% if edit_mode %}
                   <a href="{% url 'films:film_detail' film.id %}" class="btn btn-secondary ms-2">Отмена</a>
                 {% endif %}
@@ -79,6 +79,39 @@
             Средняя оценка: <strong>{{ film.average_rating_10|floatformat:1 }}</strong>
           </div>
         {% endif %}
+      {% if filter_form %}
+        <div class="mt-3 p-3 bg-light rounded">
+          <h5>Фильтр оценок</h5>
+          <form method="get">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="{{ filter_form.coutry.id_for_label }}" class="form-label">Страна:</label>
+              {{ filter_form.country }}
+            </div>
+            <div class="row">
+              <div class="col">
+                <label for="{{ filter_form.time_start.id_for_label }}" class="form-label">Дата с:</label>
+                {{ filter_form.time_start }}
+              </div>
+              <div class="col">
+                <label for="{{ filter_form.time_end.id_for_label }}" class="form-label">Дата по:</label>
+                {{ filter_form.time_end }}
+              </div>
+            </div>
+            <button type="submit" class="btn btn-secondary mt-2" name="action" value="filter_rating">Применить фильтр</button>
+          </form>
+        </div>
+      {% endif %}
+
+      {% if filtered_average_rating %}
+          <div class="mt-2 p-2 bg-light rounded text-muted">
+            Средняя оценка: <strong>{{ filtered_average_rating|floatformat:1 }}</strong>
+          </div>
+      {% else %}
+          <div class="mt-2 p-2 bg-light rounded text-muted">
+            Оценок не найдено.
+          </div>
+      {% endif %}
       </div>
 
 

@@ -6,34 +6,34 @@ from .models import Rating, Profile, Film
 @receiver(post_save, sender=Rating)
 def update_rating(sender, instance, created, **kwargs):
     film = instance.film
-    ratins = film.rating_set.all()
+    ratings = film.rating_set.all()
     sum = 0
     count = 0
-    for rating in ratins:
+    for rating in ratings:
         if not rating.profile.is_ratingban:
             sum += rating.rating
             count += 1
     if count == 0:
         film.average_rating = None
     else:
-        film.average_rating = 10 * sum / count
+        film.average_rating = round(10 * sum / count)
     film.save()
 
 
 @receiver(post_delete, sender=Rating)
 def delete_rating(sender, instance, **kwargs):
     film = instance.film
-    ratins = film.rating_set.all()
+    ratings = film.rating_set.all()
     sum = 0
     count = 0
-    for rating in ratins:
+    for rating in ratings:
         if not rating.profile.is_ratingban:
             sum += rating.rating
             count += 1
     if count == 0:
         film.average_rating = None
     else:
-        film.average_rating = 10 * sum / count
+        film.average_rating = round(10 * sum / count)
     film.save()
 
 
@@ -42,17 +42,17 @@ def ban_profile(sender, instance, created, **kwargs):
     profile_ratings = instance.rating_set.all()
     for profile_rating in profile_ratings:
         film = profile_rating.film
-        ratins = film.rating_set.all()
+        ratings = film.rating_set.all()
         sum = 0
         count = 0
-        for rating in ratins:
+        for rating in ratings:
             if not rating.profile.is_ratingban:
                 sum += rating.rating
                 count += 1
         if count == 0:
             film.average_rating = None
         else:
-            film.average_rating = 10 * sum / count
+            film.average_rating = round(10 * sum / count)
         film.save()
 
 

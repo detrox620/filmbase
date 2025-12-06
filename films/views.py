@@ -2,8 +2,8 @@ from dal import autocomplete
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import user_passes_test
 from .models import Country, Film, Genre, Person, Rating
-from .forms import CountryForm, GenreForm, FilmForm, PersonForm, CreateRatingForm
-from .helpers import paginate, build_rating_context
+from .forms import CountryForm, GenreForm, FilmForm, PersonForm, CreateRatingForm, FilterRatingForm
+from .helpers import paginate, build_rating_context, calculate_average_rating
 from django.contrib import messages
 
 
@@ -124,8 +124,8 @@ def film_list(request):
     if query:
         films = films.filter(name__icontains=query)
     films = paginate(request, films)
-    return render(request, 'films/film/list.html', {'films': films,
-                                                    'query': query, 'order_by': order_by})
+    return render(request, 'films/film/list.html',
+                  {'films': films, 'query': query, 'order_by': order_by})
 
 
 def save_user_rating(request, film):
@@ -145,15 +145,27 @@ def film_detail(request, id):
                                              "people")
     film = get_object_or_404(queryset, id=id)
 
+    filter_form = FilterRatingForm(request.GET or None)
+    filtered_average_rating = None
+
     if request.method == 'POST':
         action = request.POST.get('action')
         if action == 'delete_rating':
             Rating.objects.filter(film=film, profile=request.user.profile).delete()
             return redirect('films:film_detail', id=film.id)
+        elif action == 'save_rating':
+            return save_user_rating(request, film)
         return save_user_rating(request, film)
 
+    if request.GET and filter_form.is_valid():
+        filtered_average_rating = calculate_average_rating(film, filter_form)
+
     context = build_rating_context(request, film)
-    context['film'] = film
+    context.update({
+        'film': film,
+        'filter_form': filter_form,
+        'filtered_average_rating': filtered_average_rating,
+    })
     return render(request, 'films/film/detail.html', context)
 
 
