@@ -5,6 +5,7 @@ from .models import Country, Film, Genre, Person, Rating
 from .forms import CountryForm, GenreForm, FilmForm, PersonForm, CreateRatingForm, FilterRatingForm, FilterFilmsForm
 from .helpers import paginate, build_rating_context, calculate_average_rating
 from django.contrib import messages
+from django.db.models import Q
 
 
 def check_admin(user):
@@ -134,7 +135,7 @@ def film_list(request):
         rating_end = int(10*float(filter_form.cleaned_data['rating_end']))
         query = filter_form.cleaned_data['query']
         order_by = filter_form.cleaned_data['order_by']
-        films = films.filter(average_rating__gte=rating_start, average_rating__lte=rating_end)
+        films = films.filter(Q(average_rating__gte=rating_start, average_rating__lte=rating_end) | Q(average_rating=None))
         if country:
             films = films.filter(country=country)
         if genres:

@@ -1,7 +1,7 @@
 from django.contrib.auth import login, authenticate
 from .forms import RegisterForm
 from django.shortcuts import render, redirect
-from films.models import Profile, Country
+from profiles.models import Profile
 
 
 def signup(request):
@@ -16,9 +16,9 @@ def signup(request):
             user = authenticate(username=username, password=raw_password)
             login(request, user)
 
-            rating_user, created = Profile.objects.get_or_create(user=user)
-            rating_user.country = country
-            rating_user.save()
+            profile, created = Profile.objects.get_or_create(user=user)
+            profile.country = country
+            profile.save()
 
             return redirect('films:home')
     else:

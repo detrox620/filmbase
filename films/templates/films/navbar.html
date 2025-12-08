@@ -25,6 +25,12 @@
               <span class="nav-link">{{ user.username }}</span>
             </li>
             <li class="nav-item">
+              <form action="{% url 'profiles:profile' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="nav-link">Профиль</button>
+              </form>
+            </li>
+            <li class="nav-item">
               <form action="{% url 'logout' %}" method="post">
                 {% csrf_token %}
                 <button type="submit" class="nav-link">Выйти</button>

@@ -1,6 +1,5 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.contrib.auth.models import User
 import datetime
 
 
@@ -107,25 +106,10 @@ class Film(MyModel):
         return self.name
 
 
-class Profile(MyModel):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="Профиль оценок пользователя")
-
-    is_ratingban = models.DateTimeField("Дата бана", blank=True, null=True)
-    country = models.ForeignKey(Country, on_delete=models.CASCADE, verbose_name="Страна", null=True)
-
-    class Meta:
-        ordering = ["user"]
-        verbose_name = "Профиль"
-        verbose_name_plural = "Профили"
-
-    def __str__(self):
-        return self.user.username
-
-
 class Rating(MyModel):
     rating = models.PositiveIntegerField("Оценка")
     film = models.ForeignKey(Film, on_delete=models.CASCADE, verbose_name="Фильм")
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, verbose_name="Пользователь")
+    profile = models.ForeignKey('profiles.Profile', on_delete=models.CASCADE, verbose_name="Пользователь")
 
     class Meta:
         ordering = ["rating"]
