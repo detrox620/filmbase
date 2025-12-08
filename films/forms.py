@@ -58,16 +58,28 @@ class FilterRatingForm(forms.Form):
         widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
         input_formats=['%Y-%m-%dT%H:%M'],
         required=False)
-    
 
-class FilterFilmForm(forms.Form):
+
+ORDER_CHOICES = [
+    ('name', 'По названию (А-Я)'),
+    ('-name', 'По названию (Я-А)'),
+    ('-average_rating', 'По рейтингу (убывание)'),
+    ('average_rating', 'По рейтингу (возрастание)'),
+]
+
+
+class FilterFilmsForm(forms.Form):
     country = forms.ModelChoiceField(
         queryset=Country.objects.all(),
         empty_label="Выберите страну",
         required=False)
-    genre = forms.ModelChoiceField(
+    genres = forms.ModelChoiceField(
         queryset=Genre.objects.all(),
         empty_label="Выберите жанр",
         required=False)
-    rating_start = forms.ChoiceField(choices=[(i, str(i)) for i in range(1, 11)])
-    rating_end = forms.ChoiceField(choices=[(i, str(i)) for i in range(1, 11)])
+
+    choices = [(round(i * 0.1, 1), f"{round(i * 0.1, 1):.1f}") for i in range(10, 101)]
+    rating_start = forms.ChoiceField(choices=choices, initial='1.0')
+    rating_end = forms.ChoiceField(choices=choices, initial='10.0')
+    query = forms.CharField(required=False)
+    order_by = forms.ChoiceField(choices=ORDER_CHOICES, required=False, initial='name')

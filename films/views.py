@@ -2,7 +2,7 @@ from dal import autocomplete
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import user_passes_test
 from .models import Country, Film, Genre, Person, Rating
-from .forms import CountryForm, GenreForm, FilmForm, PersonForm, CreateRatingForm, FilterRatingForm, FilterFilmForm
+from .forms import CountryForm, GenreForm, FilmForm, PersonForm, CreateRatingForm, FilterRatingForm, FilterFilmsForm
 from .helpers import paginate, build_rating_context, calculate_average_rating
 from django.contrib import messages
 
@@ -118,30 +118,34 @@ def genre_delete(request, id):
 
 
 def film_list(request):
-    query = request.GET.get('query', '')
-    order_by = request.GET.get('order_by')
     films = Film.objects.all()
+    default_initial = {
+        'rating_start': '1.0',
+        'rating_end': '10.0',
+        'order_by': 'name',
+    }
 
-    filter_form = FilterFilmForm(request.GET)
+    form_data = request.GET if request.GET else None
+    filter_form = FilterFilmsForm(data=form_data, initial=default_initial)
     if filter_form.is_valid():
         country = filter_form.cleaned_data['country']
-        genre = filter_form.cleaned_data['genre']
-        rating_start = filter_form.cleaned_data['rating_start']
-        rating_end = filter_form.cleaned_end['rating_start']
-        films = films.filter(country=country, genre=genre)
+        genres = filter_form.cleaned_data['genres']
+        rating_start = int(10*float(filter_form.cleaned_data['rating_start']))
+        rating_end = int(10*float(filter_form.cleaned_data['rating_end']))
+        query = filter_form.cleaned_data['query']
+        order_by = filter_form.cleaned_data['order_by']
+        films = films.filter(average_rating__gte=rating_start, average_rating__lte=rating_end)
+        if country:
+            films = films.filter(country=country)
+        if genres:
+            films = films.filter(genres=genres)
+        if query:
+            films = films.filter(name__icontains=query)
+        films = films.order_by(order_by, 'name')
 
-    if query:
-        films = films.filter(name__icontains=query)
-
-    if not order_by in {'name', '-name', 'average_rating', '-average_rating'}:
-        films = paginate(request, films)
-        return render(request, 'films/film/list.html',
-                  {'films': films, 'query': query})
-    
-    films = films.order_by(order_by, 'name')
     films = paginate(request, films)
     return render(request, 'films/film/list.html',
-                  {'films': films, 'query': query, 'order_by': order_by})
+                  {'films': films, 'filter_form': filter_form})
 
 
 def save_user_rating(request, film):
