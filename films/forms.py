@@ -58,3 +58,16 @@ class FilterRatingForm(forms.Form):
         widget=forms.DateTimeInput(attrs={'type': 'datetime-local'}),
         input_formats=['%Y-%m-%dT%H:%M'],
         required=False)
+    
+
+class FilterFilmForm(forms.Form):
+    country = forms.ModelChoiceField(
+        queryset=Country.objects.all(),
+        empty_label="Выберите страну",
+        required=False)
+    genre = forms.ModelChoiceField(
+        queryset=Genre.objects.all(),
+        empty_label="Выберите жанр",
+        required=False)
+    rating_start = forms.ChoiceField(choices=[(i, str(i)) for i in range(1, 11)])
+    rating_end = forms.ChoiceField(choices=[(i, str(i)) for i in range(1, 11)])

@@ -75,7 +75,7 @@ def calculate_average_rating(film, form):
                 sum += rating.rating
                 count += 1
         if count == 0:
-            average_rating = None
+            average_rating = 'Not found'
         else:
             average_rating = sum / count
         return average_rating

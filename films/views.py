@@ -2,7 +2,7 @@ from dal import autocomplete
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import user_passes_test
 from .models import Country, Film, Genre, Person, Rating
-from .forms import CountryForm, GenreForm, FilmForm, PersonForm, CreateRatingForm, FilterRatingForm
+from .forms import CountryForm, GenreForm, FilmForm, PersonForm, CreateRatingForm, FilterRatingForm, FilterFilmForm
 from .helpers import paginate, build_rating_context, calculate_average_rating
 from django.contrib import messages
 
@@ -119,10 +119,26 @@ def genre_delete(request, id):
 
 def film_list(request):
     query = request.GET.get('query', '')
-    order_by = request.GET.get('order_by', 'name')
-    films = Film.objects.all().order_by(order_by, 'name')
+    order_by = request.GET.get('order_by')
+    films = Film.objects.all()
+
+    filter_form = FilterFilmForm(request.GET)
+    if filter_form.is_valid():
+        country = filter_form.cleaned_data['country']
+        genre = filter_form.cleaned_data['genre']
+        rating_start = filter_form.cleaned_data['rating_start']
+        rating_end = filter_form.cleaned_end['rating_start']
+        films = films.filter(country=country, genre=genre)
+
     if query:
         films = films.filter(name__icontains=query)
+
+    if not order_by in {'name', '-name', 'average_rating', '-average_rating'}:
+        films = paginate(request, films)
+        return render(request, 'films/film/list.html',
+                  {'films': films, 'query': query})
+    
+    films = films.order_by(order_by, 'name')
     films = paginate(request, films)
     return render(request, 'films/film/list.html',
                   {'films': films, 'query': query, 'order_by': order_by})
@@ -145,17 +161,17 @@ def film_detail(request, id):
                                              "people")
     film = get_object_or_404(queryset, id=id)
 
-    filter_form = FilterRatingForm(request.GET or None)
+    filter_form = FilterRatingForm(request.GET)
     filtered_average_rating = None
 
     if request.method == 'POST':
-        action = request.POST.get('action')
-        if action == 'delete_rating':
-            Rating.objects.filter(film=film, profile=request.user.profile).delete()
-            return redirect('films:film_detail', id=film.id)
-        elif action == 'save_rating':
+        if request.user.is_authenticated:
+            action = request.POST.get('action')
+            if action == 'delete_rating':
+                Rating.objects.filter(film=film, profile=request.user.profile).delete()
+                return redirect('films:film_detail', id=film.id)
             return save_user_rating(request, film)
-        return save_user_rating(request, film)
+        return redirect('films:film_detail', id=film.id)
 
     if request.GET and filter_form.is_valid():
         filtered_average_rating = calculate_average_rating(film, filter_form)

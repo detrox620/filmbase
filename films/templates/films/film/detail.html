@@ -103,9 +103,17 @@
         </div>
       {% endif %}
 
-      {% if filtered_average_rating %}
+      {% if filtered_average_rating == 'Not found'%}
+          <div class="mt-2 p-2 bg-light rounded text-muted">
+            Оценок не найдено.
+          </div>
+      {% elif filtered_average_rating  %}
           <div class="mt-2 p-2 bg-light rounded text-muted">
             Средняя оценка: <strong>{{ filtered_average_rating|floatformat:1 }}</strong>
+          </div>
+      {% elif film.average_rating  %}
+          <div class="mt-2 p-2 bg-light rounded text-muted">
+            Средняя оценка: <strong>{{ film.average_rating_10|floatformat:1 }}</strong>
           </div>
       {% else %}
           <div class="mt-2 p-2 bg-light rounded text-muted">

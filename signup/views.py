@@ -22,5 +22,5 @@ def signup(request):
 
             return redirect('films:home')
     else:
-        form = Form()
+        form = RegisterForm()
     return render(request, "signup/signup.html", {'form': form})
