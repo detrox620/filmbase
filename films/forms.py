@@ -72,14 +72,14 @@ class FilterFilmsForm(forms.Form):
     country = forms.ModelChoiceField(
         queryset=Country.objects.all(),
         empty_label="Выберите страну",
-        required=False)
+        required=False, label="Страна")
     genres = forms.ModelChoiceField(
         queryset=Genre.objects.all(),
         empty_label="Выберите жанр",
-        required=False)
+        required=False, label="Жанр")
 
     choices = [(round(i * 0.1, 1), f"{round(i * 0.1, 1):.1f}") for i in range(10, 101)]
-    rating_start = forms.ChoiceField(choices=choices, initial='1.0')
-    rating_end = forms.ChoiceField(choices=choices, initial='10.0')
-    query = forms.CharField(required=False)
-    order_by = forms.ChoiceField(choices=ORDER_CHOICES, required=False, initial='name')
+    rating_start = forms.ChoiceField(choices=choices, initial='1.0', label="Рейтинг с")
+    rating_end = forms.ChoiceField(choices=choices, initial='10.0', label="Рейтинг по")
+    query = forms.CharField(required=False, label="Название")
+    order_by = forms.ChoiceField(choices=ORDER_CHOICES, required=False, initial='name', label="Сортировка")

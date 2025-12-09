@@ -4,29 +4,29 @@
   {% csrf_token %}
   <div class="row g-3 align-items-end bg-light rounded text-muted p-3 mt-3">
     <div class="col-md-3">
-      Название: {{ filter_form.query }}
+      {% bootstrap_field filter_form.query layout='floating' show_label=True %}
     </div>
     <div class="col-md-3">
-      Сортировать по: {{ filter_form.order_by }}
+      {% bootstrap_field filter_form.order_by layout='floating' show_label=True %}
     </div>
+
+  <div class="col-md-3">
+    {% bootstrap_field filter_form.country layout='floating' show_label=True %}
   </div>
-  <div class="row g-3 align-items-end bg-light rounded text-muted p-3 ">
-    <div class="col-md-3">
-      Страна: {{ filter_form.country }}
-    </div>
-    <div class="col-md-3">
-      Жанр: {{ filter_form.genres }}
-    </div>
-    <div class="col-md-2">
-      Рейтинг с: {{ filter_form.rating_start }}
-    </div>
-    <div class="col-md-2">
-      Рейтинг по: {{ filter_form.rating_end }}
-    </div>
+  <div class="col-md-3">
+    {% bootstrap_field filter_form.genres layout='floating' show_label=True %}
+  </div>
+  <div class="col-md-2">
+    {% bootstrap_field filter_form.rating_start layout='floating' show_label=True %}
+  </div>
+  <div class="col-md-2">
+    {% bootstrap_field filter_form.rating_end layout='floating' show_label=True %}
+  </div>
+</div>
     <div class="col-md-2">
       <button type="submit" class="btn btn-primary w-100">
         <i class="bi bi-search me-1"></i> Найти
       </button>
     </div>
-  </div>
+
 </form>
